@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int getPI()	{
+int getPIN()	{
 	// use PPID and PID as the seed
 	srand(getpid() + getppid());
 	int secret = 1000 + rand() % 9000;
@@ -15,14 +15,16 @@ int main(void)	{
 	int fd[2];
 	pipe(fd);
 	pid_t pid = fork();
-	
+
 	if(pid > 0) {
 	  close(0);
 	  close(fd[1]);
 	  dup(fd[0]);
 
 	  int secretNumber;
-	  size_t readyBytes = read(fd[0], &secretNumber, sizeof(secretNumber));
+	 // size_t readyBytes = read(fd[0], &secretNumber, sizeof(secretNumber));
+	  long int readyBytes = read(fd[0], &secretNumber, sizeof(secretNumber));
+
 
 	  printf("Waiting for PIN..\n");
 	  wait(NULL);
