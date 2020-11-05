@@ -7,14 +7,15 @@
 //Function for sigint_handler()
 void sigint_handler(int sig)
 {
-	printf("Jangan Kacau saya!\n");
+	printf("Ctrl + C dilarang!\n");
 }
 
+//Dapat input nombor
 int getNumber() {
 	int number;
 
 	//prompt number
-	printf("Enter a number: ");
+	printf("Masukkan nombor : ");
 
 	//reads and stores number input
 	scanf("%d", &number);
@@ -22,6 +23,7 @@ int getNumber() {
 	return number;
 }
 
+//Periksa nombor itu prime atau tidak
 int checkPrime(int number) {
 	int n, i, flag = 0, status = 0;
 	n = number;
@@ -30,7 +32,7 @@ int checkPrime(int number) {
 		//condition for non-prime
 		if(n % i ==0) {
 		  flag = 1;
-		  printf("Flag = 1\n");
+		  //printf("Flag = 1\n");
 		  break;
 		}
 	}
@@ -48,14 +50,11 @@ int checkPrime(int number) {
 	return status;
 }
 
-/*int getPIN()	{
-	// use PPID and PID as the seed
-	srand(getpid() + getppid());
-	int secret = 1000 + rand() % 9000;
-	return secret;
-}*/
 
 int main(void)	{
+
+	printf("\n-=[ Pemeriksa Nombor Perdana(Prime) ]=-\n");
+
 	int fd[2];
 	pipe(fd);
 	pid_t pid = fork();
@@ -71,58 +70,44 @@ int main(void)	{
 	}
 
 	//what PID
-	printf("PID is %d\n", pid);
-
-	//if child
-	/*if(pid == 0) {
-	  close(1);
-	  close(fd[0]);
-	  dup(fd[1]);
-
-	  printf("Ini anak\n");
-	  int number = getNumber();
-	  write(fd[1], &number, sizeof(number));
-	  exit(EXIT_SUCCESS);
-	}*/
+	//printf("PID is %d\n", pid);
 
 	//if parent
 	if(pid > 0) {
-	  close(0);
+
+	  //tutup write
 	  close(fd[1]);
-	  dup(fd[0]);
 
 	  int secretNumber;
-	 // long int readyBytes = read(fd[0], &secretNumber, sizeof(secretNumber));
+	  read(fd[0], &secretNumber, sizeof(secretNumber));
+	  //printf("Ini bapaknya\n");
+	  close(fd[0]);
 
-	  printf("Ini bapaknya\n");
-
-	  printf("Waiting for PIN..\n");
+	  printf("Memproses nombornya..\n");
 	  wait(NULL);
-	  //printf("Bytes read: %ld\n", readyBytes);
-	  printf("PIN: %d\n", secretNumber);
 	  int status = checkPrime(secretNumber);
-	  printf("Status is %d\n", status);
+	  //printf("Status is %d\n", status);
 	  if(status == 0)
-		printf("Number entered is neither prime nor composite\n");
+		printf("Nombor yang dimasukkan bukan nombor perdana(prime) atau composite\n\n");
 	  else if(status == 1)
-		printf("%d is a prime number.\n", secretNumber);
+		printf("%d ialah nombor perdana.\n\n", secretNumber);
 	  else if(status == 2)
-		printf("%d is not a prime number.\n", secretNumber);
+		printf("%d bukan nombor perdana.\n\n", secretNumber);
 
 	}
+
 	//if child
 	if(pid == 0) {
-	  printf("Ini anak\n");
+
+	  //tutup read
+	  close(fd[0]);
+
+	  //printf("Ini anak\n");
 	  int number = getNumber();
 	  write(fd[1], &number, sizeof(number));
-
-	  close(1);
-	  close(fd[0]);
-	  dup(fd[1]);
+	  close(fd[1]);
 
 	 // printf("Ini anak\n");
-	 // int number = getNumber();
-	 // write(fd[1], &number, sizeof(number));
 	  exit(EXIT_SUCCESS);
 	}
 
